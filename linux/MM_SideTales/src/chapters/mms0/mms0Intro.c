@@ -1,0 +1,168 @@
+#include "chapters/mms0.h"
+
+void MMS_startIntro(const size_t pamaleanaSpriteTex, const size_t cubicleBackdrop, const size_t venariusSpriteTex, const size_t extraplocanSpriteTex, const size_t fontPlate, const size_t label, const size_t bubble, const size_t arrow)
+{
+	MMS_startPamaleanasCubicle(pamaleanaSpriteTex, cubicleBackdrop, venariusSpriteTex, extraplocanSpriteTex, fontPlate, label, bubble, arrow);
+
+	PLEX_changeSpriteTheaterMusic((size_t)MM_COMMON_THEMEID_MAIN);
+
+	MMS_narration(MMS_LANGUAGE_INTROA_LINE1);
+
+	MMS_narration(MMS_LANGUAGE_INTROA_LINE2);
+
+	PLEX_changeSpriteTheaterMusic((size_t)MM_COMMON_THEMEID_EXTRAPLOCAN);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE3);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE4);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE5);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE6);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE7);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE8);
+
+	MMS_pamChangeAnimation(1);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE9);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE10);
+
+	MMS_pamChangeAnimation(0);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE11);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE12);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE13);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE14);
+
+	MMS_pamChangeAnimation(2);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE15);
+
+	PLEX_stopSpriteTheaterMusic();
+
+	MMS_pamChangeAnimation(3);
+
+	PLEX_playSpriteTheaterSoundEffect((size_t)MM_COMMON_SOUNDEFFECT_SHOCK);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE16);
+
+	PLEX_changeSpriteTheaterMusic((size_t)MM_COMMON_THEMEID_NEWSROOM);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE17);
+
+	MMS_pamChangeAnimation(0);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE18);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE19);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE20);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE21);
+
+	MMS_pamTalkWait(MMS_LANGUAGE_INTROA_LINE22, 3000, true);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE23);
+
+	MMS_bossUnhide();
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE24);
+
+	MMS_bossTalk(MMS_LANGUAGE_INTROA_LINE25);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE26);
+
+	MMS_bossTalk(MMS_LANGUAGE_INTROA_LINE27);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE28);
+
+	MMS_bossTalk(MMS_LANGUAGE_INTROA_LINE29);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE30);
+
+	MMS_bossTalk(MMS_LANGUAGE_INTROA_LINE31);
+
+	MMS_bossHide();
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE32);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE33);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE34);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE35);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE36);
+
+	MMS_extrapMaintenanceVoice(MMS_LANGUAGE_INTROA_LINE37);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE38);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE39);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE40);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE41);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE42);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE43);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE44);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE45);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE46);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE47);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE48);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE49);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE50);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE51);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE52);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE53);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE54);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE55);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE56);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE57);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE58);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE59);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE60);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE61);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE62);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE63);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE64);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE65);
+
+	MMS_extrapTalk(MMS_LANGUAGE_INTROA_LINE66);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE67);
+
+	MMS_pamTalk(MMS_LANGUAGE_INTROA_LINE68);
+
+	PLEX_stopSpriteTheaterMusic();
+}

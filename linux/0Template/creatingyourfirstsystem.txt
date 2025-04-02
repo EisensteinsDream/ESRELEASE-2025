@@ -1,0 +1,935 @@
+It's recommended to go through the steps in 'README_FIRST.txt' before doing this tutorial. You should also make sure that you have a running executable before proceeding. This tutorial also expects you to know a little 'C/C++'. PLEX at this stage might not be helpful if you don't.
+
+----------------------------
+
+This is a tutorial to create systems. It also goes over the basics of the Plexiglass Utility Layer (PLEX). Which is a library abstracted over SDL and portaudio that is designed primarily for games. It also can be used for any type of desktop executable that utilizes graphics and/or sound. In PLEX, systems are crucial. They are optional yet very conducive to the way PLEX is designed.
+
+Systems have a 'Start', 'Update', and 'End' function. The 'Start' function loads resources that are maintained whether or not the system is active. 'Update' is basically the system actually running. 'End' frees the resources allocated in 'Start'. It also has an extra phase activated/deactivated. In most cases, activated is simply a marker whether or not the system should update. (NOTE: Some of the earlier systems I've coded for other projects only have running/notrunning. This is inconvenient in most cases. You often want resources to be loaded on standby within the system while a system is not active).
+
+If the 'Start' or the 'Update' functions return 'false', then the program is expected to terminate with a fatal error. The 'End' function returns nothing. The program should already be terminating when it's called.
+
+For this example we will be creating a simple rectangle-based indexed collision system. It will allow you to create, destroy, and reference collisions. Plus, it will teach you how to use 'ExpandArrays' which are an essential feature of PLEX.
+
+----------------------------
+
+NOTE: I'm using UNIX style filepaths in these examples. I am Linux user; it's a force of habit. It's pretty much the same as windows except it uses the opposite slashes. Most modern windows compilers don't care about this. Possibly all of them don't. It might be jarring to a windows user. There are no drive letters like 'C:' in UNIX filepaths, either. However, drive letters are not that important to this tutorial. Every directory path is relative to the directory THIS file is in.
+
+----------------------------
+
+Step 1: In the directory this file is in, create a new directory in 'src' called 'collision' or 'src/collision'
+Step 2: In the directory this file is in, create a new directory in 'include' also called 'collision' or 'include/collision'
+
+----------------------------
+
+Step 3: copy 'codeexamples/basicsystem.c' into the 'src/collision' directory. Rename it collision.c.
+Step 4: copy 'codeexamples/basicsystem.h' into the 'include/collision' directory. Rename it collision.h
+
+NOTE: Do not copy 'codeexamples/collision.c' or 'codeexamples/collision.h'. These files are the end point of this tutorial. However, you can reference these files if you feel you've done something wrong. Some of the functions are also modified multiple times in different steps, so they may not look the same as these examples.
+
+----------------------------
+
+Step 5: open 'src/collision/collision.c' in a text editor. At the top of the file replace '#include "(system directory)/(system).h"' with '#include "collision/collision.h"' Go ahead and erase the comment '// < preferably all lower case'
+Step 6: Replace all instances of '(PROJ)' with your project namespace. This is same one you decided in 'README_FIRST.txt'. If you don't remember what that is, it should be at the beginning of all functions in 'game.c'. You should familiarize yourself with it.
+
+Step 7: Replace everywhere that it says '(System Name)' with 'Collision'. Make sure to take away the parentheses. If it has quotes around it you MUST keep the quotes around it!
+Step 8: Close 'src/collision/collision.c'
+
+Step 9: Open 'include/collision/collision.h' in a text editor. In the top line: '#ifndef (PROJ)_BASICSYSTEM_H' replace BASICSYSTEM with COLLISION. Also do this in the second line '#define (PROJ)_BASICSYSTEM_H'
+Step 10: In 'include/collision/collision.h', Replace every instance of (PROJ) with the same project namespace that you used in 'src/collision/collision.c'
+Step 11: Also, Replace everywhere that it says '(System Name)' with 'Collision' in the same way you did for the source file.
+Step 12: Optionally delete the 'NOTE:' comment at the top of the file. It's not going to tell you anything this tutorial doesn't already. You could also create your own commented note in it's place something like 'NOTE: indexed collision system.' That's up to you.
+Step 13: Close 'include/collision/collision.h'
+
+Step 14: Open 'src/game.c'.
+
+NOTE: For a simple hack of the tutorial you're reading now, in this file you can also find and replace all instances of '(PROJ)' with your namespace. Then you can just copy and paste examples from this document directly.
+
+----------------------------
+
+Step 15: In the function '(PROJ)_startGame()', insert the following lines right before the comment that starts '// loads the generic font'.
+
+	if(!(PROJ)_startCollsion())
+	{
+		PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_START, PLEX_ERROR_SEVERITY_FATAL, "Collision System");
+		return false;
+	}
+
+This will start the collision system at game start, terminating the game on failure. Also, this uses the PLEX_error function which executes an error. The arguments passed into this function go as follows:
+
+	A) 'PLEX_ERROR_CATEGORY_INPROJECT' is the category. This indicates that it is an error in a project based off PLEX rather then PLEX itself.
+	B) 'PLEX_ERROR_START' is the type of error. This type indicates an error at the start of a system.
+	C) 'PLEX_ERROR_SEVERITY_FATAL' this indicates the error is a fatal error. Serious enough to terminate the program.
+	D) "Collision System" is simply a message tossed into the error to be printed. This indicates the specific system which has failed is, indeed, our newly created collision system.
+
+----------------------------
+
+Step 16: You need to uncomment the line '// const uint64_t time = PLEX_getGameTime(); // < uncomment when needed'. Also, you might as well erase the comment that now appears at the end '// < uncomment when needed'.
+
+----------------------------
+
+Step 17: In the function '(PROJ)_updateGame()' put in the following lines within the 'else' brackets of the 'if(PLEX_askingToQuit() || p_quitPrompt)' condition. Replacing the comment "// update everything here //" with:
+
+	if((PROJ)_isCollisionActive() && !(PROJ)_updateCollsion(time))
+	{
+		PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_UPDATE, PLEX_ERROR_SEVERITY_FATAL, "Collision System");
+		return false;
+	}
+
+Notice that the error is identical to the one above except it's a 'PLEX_ERROR_UPDATE' rather than a 'PLEX_ERROR_START'. Because, of course, this is for an update failure not a start failure. This specifies where the problem is. Also, notice the '(PROJ)_isCollisionActive() &&' at the beginning. We don't want to toss a fatal error simply because a system is not active, do we?
+
+Anyway, this is what tells the game to update the collision system on each iteration.
+
+----------------------------
+
+Step 18: Scroll to the end, in '(PROJ)_endGame()'. Systems should be FILO or 'first in, last out'. So we're going to put this before PLEX ends. I suggest putting it right after the line 'PLEX_destroyTexture(p_font);':
+
+	(PROJ)_endCollision();
+
+----------------------------
+
+Step 19: Your system now needs to be activated. In the start function, before the line 'p_quitPrompt = false;' put:
+
+	(PROJ)_activateCollision();
+
+This simply tells the program to activate the collision system. You can activate and deactivate this at will now using the (PROJ)_activateCollision() and (PROJ)_deactivateCollision() functions. You can also check if it's active using the '(PROJ)_isCollisionActive()'  function as shown in step 17.
+
+Step 20: Open 'include/game.h'. Below the line '#include "meta/proj_language.h"' and put the line:
+
+	#include "collision/collision.h"
+
+----------------------------
+
+NOTE: You only need to do the next steps if you're using the makefile. If you're using an IDE just make sure the compiled object 'collision' is included in the compile path. I can't tell you how; I don't know which IDE you're using. People not using the makefile can skip to Step 21.
+
+Step 20b: Open 'makefile' in the directory this file is in with a text editor.
+
+Change the following lines:
+
+	ROBJ=$(ROBJD)/game.o
+
+	DOBJ=$(DOBJD)/game.o
+
+To:
+
+	ROBJ=$(ROBJD)/collision.o $(ROBJD)/game.o
+
+	DOBJ=$(DOBJD)/collision.o $(DOBJD)/game.o
+
+Step 20c: Scroll down to '# HEADER RULES #'. Below 'HRFILENAME' add:
+
+	HRCOLLISION=$(INC)/collision/collision.h $(SRC)/collision/collision.c $(HRPLEX) $(HRLANGUAGE)
+
+Step 20d: See the line:
+
+	HRGAME=$(INC)/game.h $(SRC)/game.c $(HRPLEX) $(HRFILENAME)
+
+Change that line to:
+
+	HRGAME=$(INC)/game.h $(SRC)/game.c $(HRPLEX) $(HRFILENAME) $(HRCOLLISION)
+
+Step 20e: Scroll down to '## RELEASE ##'. Above the line that starts with '$(ROBJD)/game.o' put the lines:
+
+	$(ROBJD)/collision.o : $(HRCOLLISION)
+		$(CC) $(FLAGS) $(OBJFLAGS) $(LOBJFLAGS) $(SRC)/collision/collision.c -o $(ROBJD)/collision.o
+
+Step 20f: Scroll down to the line that says '## DEBUG ##'. Above the line that starts with '$(DOBJD)/game.o' (notice the slight difference) put the lines:
+
+	$(DOBJD)/collision.o : $(HRCOLLISION)
+		$(CCD) $(FLAGS) $(OBJFLAGS) $(LOBJFLAGS) $(SRC)/collision/collision.c -o $(DOBJD)/collision.o
+
+----------------------------
+
+NOTE: You should be safe to compile now. If the program does not compile, something went wrong. It's probably best not to proceed until you can compile it. Carefully scan steps above for anything that may be out of place. You can also reference the codeexamples for 'collision.c' and 'collision.h' if your problem is not in game.c or with compiling itself.
+
+----------------------------
+
+Ok, now we get to the meat of it. This system is a kind of ticketing system. You can add a collision rectangle and it returns an index as an int64_t. If it returns a -1, that means the process of adding the collision box was a failure. Otherwise, you can store the ticket somewhere (like inside of an entity that needs to check the collision to move). For efficiency's sake, this will all be done in one loop.
+
+NOTE: This is not an advanced physics system. It will suffice pretty well in most circumstances. It's useful for simple 2D games, and should be reasonably efficient.
+
+----------------------------
+
+Step 21: Let's now add the containers we need. PLEX is based off of C not C++. There are no actual containers like vectors, because there are no templates nor classes. Also, I don't use any of the standard library type containers either. PLEX has special containers built for it's managed memory. It doesn't use garbage collectors, but instead simply clears all memory away at the end of the program. It's semi-manual memory management. Which means even though it's cleared at end of program, you're still expected to signal deallocation manually (More technically, mark it for recycling because PLEX does memory recycling. It also optionally stores diagnostic information to help locate memory hangs. Memory may hang, but it should never leak).
+
+Open 'src/collision/collision.c'. Put the following lines above 'static bool p_active = false;':
+
+	static PLEX_EXPANDARRAY* p_cBoxes = NULL;
+	static PLEX_EXPANDARRAY* p_moves = NULL;
+
+See how these don't define type? PLEX_EXPANDARRAY does not know the type of what it's storing, only the size. It will be decided in the 'start' function when they are allocated. This is something you have to be careful with. VERY careful. It's quite safe if you do it right, but you have to use the proper steps. Exactly as this tutorial outlines. It's not hard, just keep an eye on it.
+
+----------------------------
+
+Step 22: We need to create a struct type to contain collision boxes. For now, we're just going to use the PLEX_RECT inside, but we'll eventually add functions to activate/deactivate these. PLEX_RECT is a struct in PLEX that has 2 components: origin and dimens. Origin is a PLEX_POINT which contains x,y coordinates as doubles. Dimens is a PLEX_DIMENS which contains w,h dimensions; also as doubles. This will be referenced many times in this tutorial.
+
+Open 'include/collision/collision.h'. Replace the comment '// structs, unions, and enums go here if they are needed.' with:
+
+	typedef struct
+	{
+		PLEX_RECT area;
+		bool activated;
+	} (PROJ)_COLLISIONBOX;
+
+This is not in the source file because it's a global struct intended to be accessed and utilized outside of collision.c.
+
+----------------------------
+
+Step 23: Open 'src/collision/collision.c'. We'll start with allocating 'p_cBoxes'. We'll get back to 'p_moves' later. In the '(PROJ)_startCollision' function right before 'p_active = false;' put the following function:
+
+	p_cBoxes = PLEX_genExpandArray(10, sizeof((PROJ)_COLLISIONBOX));
+
+That should allocate a new expand array in the managed memory. It will preallocate '10' instances of precached memory each the size of a (PROJ)_COLLISIONBOX.
+
+NOTE: It is EXTREMELY EXTREMELY crucial you get the order of these arguments correct. Do what you can to keep that in your mind. The number of entries it allocates first, and the size of entries second. Write it down if you need to. This is an incredibly EASY and DANGEROUS mistake to make as they are both size_t's, and the compiler won't detect anything wrong if you get these in the wrong order.
+
+----------------------------
+
+Step 24: Now that's been allocated we need to check if anything went wrong. Put this directly below the line in step 20:
+
+	if(p_cBoxes == NULL)
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ALLOCFAIL, PLEX_ERROR_SEVERITY_FATAL, "On Starting Collision System", "Collision Boxes");
+	}
+
+I must also stress it's important to keep this as a fatal error. The only reason that the PLEX_genExpandArray function should ever fail is that the OS failed to allocate the memory. Which indicates that either the program ran out of memory (extremely rare on modern system), or something more serious. Obviously, if your OS is not allocating enough memory the problem is deeper than a project based on this library.
+
+NOTE: Also notice this is a 'PLEX_error2'. The '2' indicates 2 arguments. The first is typically where it happened. The second is what it's happening to. These are both C-strings. The error system does not distinguish what you pass in these strings, it just prints or shows them in a pop-up. The 'PLEX_error' function only passes one of these. 'PLEX_errorNoDesc' passes in no messages. The other error functions are for internal PLEX usage only.
+
+Step 25: Now that we allocated the p_cBoxes. Go to the 'End' function and put this line within it's brackets. Put this right above the line 'p_running = false;':
+
+	PLEX_destroyExpandArray(&p_cBoxes);
+
+Notice this passes a double pointer. That's because not only does this destroy the expand array, but it sets the pointer containing it to NULL. There's no need to set the passed pointer to NULL afterwards.
+
+----------------------------
+
+Step 26: Now we want to create a struct that contains the move data that will check the collision while updating. This will have 2 elements: an index reference to the collision box, and an x/y distance. Erase the line '// structs, unions, and enums go here if they are needed.', and in it's place put:
+
+typedef struct
+{
+	size_t index;
+	PLEX_POINT distance;
+} P_MOVECOLLISION;
+
+I use the namespace of 'P_' in order to indicate this struct is compiled in the source file, rather the the header, and not meant to be referenced in other source files. There's no official formal namespacing conventions, but you can use this one if you like.
+
+Step 27: We can allocate the 'p_moves' expandarray now that we know how large they will be. Below the 'cBoxes == NULL' clause in the 'Start' function, put these lines:
+
+	p_moves = PLEX_genExpandArray(10, sizeof(P_MOVECOLLISION));
+
+	if(p_moves == NULL)
+	{
+		PLEX_destroyExpandArray(&p_cBoxes);
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ALLOCFAIL, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Moves");
+		return false;
+	}
+
+Pretty similar to what we did with 'p_cBoxes', right? You notice that it deallocates 'p_cBoxes' on failure. That's because it successfully allocated them at this point, and failed to allocate the moves. If it fails to allocates the moves there's no need to keep the cboxes in memory. It won't hurt anything if you don't do this, PLEX will deallocate the memory anyway. I just feel it's good coding practice.
+
+Step 28: In the 'End' function, before the line 'PLEX_destroyExpandArray(&p_cBoxes);' put:
+
+	PLEX_destroyExpandArray(&p_moves);
+
+Step 29: you should be able to compile and run this. I'd recommend doing that just because, at this point, you want to make sure that nothing has gone wrong.
+
+----------------------------
+
+NOTE: Expand arrays should NEVER be done with abstract types like C++ classes. Trying to put classes in one of these things will cause REAL problems. You can possibly store pointers to structs in one if you're smart about it and are careful. It's not preferred, though. I'm planning to eventually create a PLEX++ addition to PLEX that has class friendly containers plugged into the managed memory. I just haven't yet. Yes, I know, smart pointers exist. They likely will be utilized partially for this task. I haven't tackled it yet. But I still feel that having everything within one cohesive system has it's advantages.
+
+----------------------------
+
+Step 30: Now we actually add stuff. The way in which you add things to the expand array is by incrementing a new value onto the array. Then modifying the newly incremented value. Knowing this, we're going to create a new function. It's neither a setter nor a getter so typically we want to put it before the 'start, update, and end functions' section. Sections are marked off by comments with dashes. Put this above 'void (PROJ)_activateCollision()':
+
+int64_t (PROJ)_addCollisionBox(const bool ignoreCollision, const double x, const double y, const double w, const double h)
+{
+	(PROJ)_COLLISIONBOX* newBox = NULL;
+
+	if(!p_running)
+	{
+		PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "Add Collision Box");
+		return -1;
+	}
+
+	if(!PLEX_incrementExpandArray(p_cBoxes))
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_INCREMENT, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Collision Boxes");
+		return -1;
+	}
+
+	newBox = PLEX_getExpandArrayLast(p_cBoxes);
+
+	if(newBox == NULL)
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRELAST, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Collision Boxes");
+		return -1;
+	}
+
+	newBox->area.origin = PLEX_convPoint(x, y);
+	newBox->area.dimens = PLEX_convDimens(w, h);
+
+	return PLEX_expandArrayCount(p_cBoxes) - 1;
+}
+
+So what is this?
+
+	A) The check at the beginning is whether or not the p_running is false. We don't want to start throwing collision boxes into the system unless it has allocated 'p_cBoxes' and 'p_moves'. So it stops the attempt if the collision system is not running. Then it returns -1. Why '-1'? Well, that's just an indicator that it did not create a collision box therefore it does not have an index. This is why it returns a signed integer rather than unsigned.
+
+	B) Also, it's a 'minor' error because it's unlikely that anything serious went wrong. Minor errors default to printing in the console but NOT having a pop-up error. The errors have 5 severities: badstyle (doesn't show at all, unless set in config), minor (defaults to print not to show pop-up), major (defaults to print and show pop-up), fatal (always terminates and prints, cannot be set to not terminate), and impossible (always terminates and prints, cannot be set to not terminate, only for situations where something unexpected has gone wrong). The behavior of 'badstyle', 'minor', and 'major' errors can be changed in the end user's config.
+
+	C) Ok, so we use PLEX_incrementExpandArray to indicate that we want one (PROJ)_COLLISIONBOX sized block of memory added to the expand array. Again, I say (PROJ)_COLLISIONBOX sized because it's C hence no typechecking. If it fails it means a major memory allocation issue therefore a fatal error.
+
+	D) The new cbox pointer at the top of the function is set to point at 'PLEX_getExpandArrayLast' which should return a pointer to the block you just allocated. If it can't, it will return NULL. That's a fatal error for the same reason as the one above: memory failure.
+
+	E) Ok, so now it's time to assign the new rectangle. At this point, everything should have gone right. If any step up to and including the original PLEX_genExpandArray has gone wrong it should terminate, preventing a crash. If not, everything is good.
+
+	F) Finally, we return the index. We use the function 'PLEX_expandArrayCount(p_cBoxes)' which returns the number of collision boxes allocated. On first run, this should be 1. Of course, the index starts at 0 so you subtract 1 from the outcome. The first collision box should be number 0, then number 1 for the second, number 2 for the third, etc. This number will be how you access collision boxes from outside of the function.
+
+----------------------------
+
+Step 31: The function has to be accessible outside of the source file, right? Assuming you already know C you must know this annoying yet extremely useful necessary step. Open 'include/collision/collision.h'
+
+above 'extern void (PROJ)_activateCollision();' put:
+
+	extern int64_t (PROJ)_addCollisionBox(const bool ignoreCollision, const double x, const double y, const double w, const double h);
+
+Step 32: close 'include/collision/collision.h'
+
+----------------------------
+
+Step 33: So this should work on a basic level. However, there may be a problem. What if you put the collision box where it's already colliding? It would be trapped on creation. We should check for collisions as they are added. There should be a uniform function to check for collisions. Let's make this a static function rather than a public function. We want to manage it internally within the unit. This way we avoid the chaos and inefficiency of collisions being checked all over the place. I tend to use the 'p_' namespace for static functions. Same reason I use 'P_' for structs.
+
+You want to remove the line '// static functions that are needed go here.'. In it's place put:
+
+static int64_t p_checkCollision(const int64_t ignore, const PLEX_RECT with)
+{
+	size_t count = 0;
+
+	if(with.activated) return -1;
+
+	count = PLEX_expandArrayCount(p_cBoxes);
+
+	for(size_t l = 0; l < count; ++l)
+	{
+		(PROJ)_COLLISIONBOX* box = NULL;
+
+		if(l == ignore) continue; // < skips the index intended to be ignored
+
+		box = PLEX_getExpandArrayEntry(l, p_cBoxes);
+
+		if(box == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_IMPOSSIBLE, "Collision System", "Collision Boxes");
+			return -1;
+		}
+
+		if(!box->activated) continue;
+
+		if(PLEX_rectCollisionNoMove(box->area, with.area)) return l;
+	}
+
+	return -1;
+}
+
+----------------------------
+
+NOTE: If you build now, it won't work if you have the compiler flagged to not compile with unused static functions. If you are using the makefile, this should be the case. Also, I rarely do the null checks for pointers passed into static functions. Because I'd assume that enough care is put into the non-static functions that the public functions that call them prevent passing NULLs.
+
+----------------------------
+
+Ok, so to break down what this function does:
+
+	A) returns -1 on failure and returns the colliding box on success. Just like the above method.
+
+	B) I use the 'PLEX_getExpandArrayEntry' rather than 'PLEX_getExpandArrayLast' because it gets the index of 'l' rather than the last one. Also, you may notice I use 'ze' rather than 'l' in loops in other programs. This is just a signature of mine. People might hate you if you do this. It's done for no reason beyond my ego. I'm keeping it 'l' in these examples, could just as easily be 'i', to make sure anybody that uses them is not as easy to hate as I am.
+
+	C) Executes an 'acquire' error if it's getting bad data from the expandarray. Notice I made it 'impossible'. The reason is that theoretically, since you use the count to acquire the rectangle, it should not be possibly out of range (which returns a NULL pointer). It means some kind of unintentional data manipulation or corruption happened somewhere, somehow. That should be 'impossible' but might still happen in weird circumstances. Impossible is considered the highest error even more than fatal. If you are using PLEX_getExpandArrayLast rather than PLEX_getExpandArrayEntry you should use 'PLEX_ERROR_ACQUIRELAST' instead. Because AcquireLast expects the data to be recently allocated and 'PLEX_ERROR_ACQUIRE' expects it to already be checked for safety.
+
+	D) An 'ignore' value is passed in. If the index of the checked box is the same, it will be ignored. It's not relevant in this case because the checked box doesn't have a number yet. This is a way to make sure something doesn't check itself for collision. It will always return true in that case. You can pass in a negative number if you want it to ignore nothing.
+
+----------------------------
+
+Step 34: We will modify the 'addCollisionBox' function now. Since there's no point in incrementing on failure a second rectangle will be created and set. Then it will be applied:
+
+int64_t (PROJ)_addCollisionBox(const bool ignoreCollision, const double x, const double y, const double w, const double h)
+{
+	(PROJ)_COLLISIONBOX* newBox = NULL;
+
+	(PROJ)_COLLISIONBOX copyBox;
+
+	if(!p_running)
+	{
+		PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "Add Collision Box");
+		return -1;
+	}
+
+	copyBox.area.origin = PLEX_convPoint(x, y);
+	copyBox.area.dimens = PLEX_convDimens(w, h);
+
+	if(!ignoreCollision && p_checkCollision(-1, copyBox) != -1) // -1 means no collision
+	{
+		PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_BADOPERATION, PLEX_ERROR_SEVERITY_MINOR, "Attempted to add a collision block where it's already colliding");
+		return -1;
+	}
+
+	if(!PLEX_incrementExpandArray(p_cBoxes))
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_INCREMENT, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Collision Boxes");
+		return -1;
+	}
+
+	newBox = PLEX_getExpandArrayLast(p_cBoxes);
+
+	if(newBox == NULL)
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRELAST, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Collision Boxes");
+		return -1;
+	}
+
+	newBox->area.origin = PLEX_convPoint(x, y);
+	newBox->area.dimens = PLEX_convDimens(w, h);
+	newBox->activated = true;
+
+	return PLEX_expandArrayCount(p_cBoxes) - 1;
+}
+
+Ok, much better.
+
+	A) As already mentioned another collision box is created and set to check whether it's colliding BEFORE it hits the next spot.
+
+	B) a boolean argument has been added to potentially ignore collision. Why would you do this? Well, imagine you put two intersecting walls that collide. Since they never are going to move it doesn't really matter whether they do or not.
+
+	C) Also, we have a PLEX_ERROR_BADOPERATION which is an error that is not specifically defined but will be described in the last passed string. This is informal. The compiler doesn't discern, just passes the message.
+
+----------------------------
+
+Step 35: Next comes the moves. The moves are put on a stack. All moves on the stack are checked in the 'update' function. Ultimately the stack is cleared after that. Firstly we need a function to add a move to the 'p_moves' stack. Put this function below the 'int64_t (PROJ)_addCollisionBox(const bool ignoreCollision, const double x, const double y, const double w, const double h)' function:
+
+void (PROJ)_addMove(const size_t index, const double x, const double y)
+{
+	P_MOVECOLLISION* move = NULL;
+
+	size_t boxCount = 0;
+
+	if(!p_running)
+	{
+		PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "While adding moves");
+		return;
+	}
+
+	if(!p_active)
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_BADOPERATION, PLEX_ERROR_SEVERITY_MINOR, "While adding moves", "Collision System is inactive");
+		return;
+	}
+
+	boxCount = PLEX_expandArrayCount(p_cBoxes);
+
+	if(index >= boxCount)
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_OVERLIMIT, PLEX_ERROR_SEVERITY_MINOR, "While adding moves", "Moves");
+		return;
+	}
+
+	if(!PLEX_incrementExpandArray(p_moves))
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_INCREMENT, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Moves");
+		return;
+	}
+
+	move = PLEX_getExpandArrayLast(p_moves);
+
+	if(move == NULL)
+	{
+		PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRELAST, PLEX_ERROR_SEVERITY_FATAL, "Collision System", "Moves");
+		return;
+	}
+
+	move->index = index;
+	move->distance = PLEX_convPoint(x, y);
+}
+
+Here we go. Another function:
+
+	A) This time I set the return value as void. I see no purpose in returning an index of the newly created move. Moves will be cleared off during every update. It's unlikely that the index will be relevant if stored.
+
+	B) if(index >= boxCount) is a measure to prevent this from accessing a box which doesn't exist by exceeding the count. It tosses the more insignificant error of 'PLEX_ERROR_OVERLIMIT' instead of the typically fatal 'PLEX_ERROR_ACQUIRE'. Of course, the coder simply tossing in a bad index isn't a major concern. Also, since this is tossing in an unsigned integer type, anything below 0 will resolve as the capacity of the integer plus (ie. minus) the negative integer by C's rules, anyway. So, we don't need an 'PLEX_ERROR_UNDERLIMIT' error.
+
+	PLEX_ERROR_OVERLIMIT and PLEX_ERROR_UNDERLIMIT are typically just errors that indicate a number is more or less than it should be. With the passed in string of "Moves" being the indicator.
+
+	C) Assume the x, y is xDist and yDist. You can replace it with those as separate doubles if you like. I figure just using a point is more convenient. Also, if you want to be really picky, you can recast PLEX_POINT as something more relevant to distance.
+
+----------------------------
+
+Step 36: This a public function so we must reference it in the header now. So open up 'include/collision/collision.h' below 'extern int64_t (PROJ)_addCollisionBox(const double x, const double y, const double w, const double h);' put this line:
+
+	extern void (PROJ)_addMove(const size_t index, const double x, const double y);
+
+Step 37: close 'include/collision/collision.h'
+
+----------------------------
+
+Step 38: As mentioned above you want to clear all of the moves at the end of the 'update' function. So go to the end of the function 'bool (PROJ)_updateCollision(const uint64_t time)' and right before the return statement put the line:
+
+	PLEX_clearExpandArray(p_moves);
+
+This doesn't destroy the array but simply cleans off all the values.
+
+Step 39: Now, we're going to set up the move check loop above that. We need a variable to store the number of p_moves being made. I use size_t count for this. It can be any unsigned integer type though. So at the absolute top of the update function put:
+
+	size_t count = 0;
+
+Step 40: It's now time to iterate through all of the collision moves that were added. So we put this above the line 'PLEX_clearExpandArray(p_moves)'. If it's not above, obviously it won't work. It will end up clearing the stack before checking it. Also, This must be below the running and active checks. ie. the parts where it goes 'if(!p_running)' and 'if(!p_active)':
+
+	count = PLEX_expandArrayCount(p_moves);
+
+	for(size_t l = 0; l < count; ++l)
+	{
+		(PROJ)_COLLISIONBOX newBox;
+
+		(PROJ)_COLLISIONBOX* box = NULL;
+
+		P_MOVECOLLISION* move = PLEX_getExpandArrayEntry(l, p_moves);
+
+		PLEX_RECT* box = NULL;
+
+		if(move == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_IMPOSSIBLE, "During move check", "Moves");
+			return false;
+		}
+
+		box = PLEX_getExpandArrayEntry(move->index, p_cBoxes);
+
+		if(box == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_IMPOSSIBLE, "During move check", "Collision Boxes");
+			return false;
+		}
+
+		newBox.area.origin.x = box->area.origin.x + move->distance.x;
+		newBox.area.origin.y = box->area.origin.y + move->distance.y;
+
+		newBox.area.dimens = box->area.dimens;
+
+		if(p_checkCollision(move->index, newBox) == -1) box->area.origin = newBox.area.origin;
+	}
+
+Everything this loop is doing:
+
+	A) It gets the count of the number of moves so they can be iterated through.
+	B) You create a for loop iterating through the move count.
+	C) You point a pointer to every move in the iteration. Checking for failure to load that pointer.
+	D) It then acquires the collision box from the index stored in the move pointed to.
+	E) It also checks if it failed to acquire that box. Terminates the program with memory error if not.
+	F) It assigns a new origin for the box to potentially be at.
+	G) It uses the static p_checkCollision function described earlier, ignoring it's own index, to check if there's a collision. If there is not, it sets the collision box referenced by the move to the new origin.
+
+----------------------------
+
+Step 41: We need a means to get the rectangles back from the system. That way we can reference it to draw something connected to it (like an entity). Erase the comment '// any functions that set internal values go here.' and replace it with the function:
+
+	(PROJ)_COLLISIONBOX (PROJ)_getCollisionBox(const int64_t index)
+	{
+		(PROJ)_COLLISIONBOX blankBox;
+
+		(PROJ)_COLLISIONBOX* box = NULL;
+
+		size_t count = 0;
+
+		blankBox.area = PLEX_convRect(PLEX_convPoint(0, 0), PLEX_convDimens(0, 0));
+		blankBox.activated = false;
+
+		if(index < 0)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_UNDERLIMIT, PLEX_ERROR_SEVERITY_MINOR, "While getting collision rectangle", "Collision Index");
+			return blankBox;
+		}
+
+		count = PLEX_expandArrayCount(p_cBoxes);
+
+		if(index >= count)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_OVERLIMIT, PLEX_ERROR_SEVERITY_MINOR, "While getting collision rectangle", "Collision Index");
+			return blankBox;
+		}
+
+		box = PLEX_getExpandArrayEntry(index, p_cBoxes);
+
+		if(box == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_FATAL, "While getting collision rectangle", "Collision Box");
+			return blankBox;
+		}
+
+		return *box;
+	}
+
+Step 42: Of course, this is a public function so it must be also forward declared in the header 'collision/collision.h'. In this header there should also be a line like  '// any functions that set internal values go here.'. Erase it and replace it with the line:
+
+	extern PLEX_RECT (PROJ)_getCollisionRectangle(const int64_t index);
+
+----------------------------
+
+Step 43: We are finally going to actually set up a little test program. This will get you on your way. Close 'src/collision/collision.c' and open 'src/game.c'.
+
+Step 44: Put this in the 'Update' right above the return statement:
+
+	p_collisionTest();
+
+In order for convenience, I'm going to put this entire thing into a set of static functions. That way they can be modified or removed with ease. This is just a test program, after all. It can be the basis for a final product, if you wish, but it's not the final product.
+
+Step 45: Ok, so let's create the function/s themselves. In the section '// static functions' below the function 'p_checkCollision(const int64_t ignore, const PLEX_RECT with)' create a new function:
+
+	static void p_collisionTest()
+	{
+		if(!p_collisionInit)
+		{
+			p_startPlayer();
+			p_startObstruction();
+
+			p_collisionInit = true;
+		}
+
+		if(!(PROJ)_collisionBoxDeactivated(p_playerColIndex))
+		{
+			p_movePlayer();
+			p_drawPlayer();
+		}
+
+		if(!(PROJ)_collisionBoxDeactivated(p_obstColIndex)) p_drawObstruction();
+	}
+
+Step 46: We now have quite of code to fill this up. This isn't typically how you'd do things. I'd recommend creating a different system for the player, and a different system for other things. But, for the sake of expedience, I'm going to compact it quite a bit here. Ok, so at the top in the section '// static values'. Right below the comment put 'static PLEX_EXPANDARRAY* p_moves = NULL':
+
+	static bool p_collisionInit = false;
+
+You can also optionally put 'p_collisionInit = false;' in the '(PROJ)_startGame' function. Which is for resetting if you chose to do that in the future.
+
+Step 47: Below 'static bool p_collisionInit = false;' you're going to put two int64_t's or any type of signed integer. These will be references to the two collision blocks you will soon create:
+
+	static int64_t p_playerColIndex = -1;
+	static int64_t p_obstColIndex = -1;
+
+Step 48: Put these in the static function section just above 'static void p_collisionTest()'. It's very important they are above. Static functions are read in linear order:
+
+	static void p_startPlayer()
+	{
+		const PLEX_DIMENS playerDimens = PLEX_convDimens(1.5, 1.5);
+
+		p_playerColIndex = (PROJ)_addCollisionBox(false, PLEX_WIDTHUNITMAX(false)/2.0 - playerDimens.w/2.0, PLEX_HEIGHTUNITMAX()/2.0 - playerDimens.h/2.0, playerDimens.w, playerDimens.h);
+
+		if(p_playerColIndex == -1)
+		{
+			PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_BADOPERATION, PLEX_ERROR_SEVERITY_MINOR, "Failed to create player collision block");
+			return; // < redundant but put in case you put anything after this for any reason.
+		}
+	}
+
+Some quick explanations:
+
+	A) PLEX_WIDTHUNITMAX and PLEX_HEIGHTUNITMAX are functions designed to return an unscaled pixel approximation of the screen. More on scaling when I get to the draw phase. I also subtract half the player dimensions from each of these coordinates to put the middle of the player's collision square in the middle of the screen. Also, unscaled.
+
+	B) It tosses a minor error if it fails to create the player box. This could possibly be a fatal error. It doesn't need to be really. Most of the errors inside the function are fatal, anyway. This just needs to print something to the console, or optionally dump, the error so whoever is working on the program knows what's going on.
+
+Step 49: The next function is going to be a veritable copy/paste of the last. Place it right below the one you just created:
+
+	static void p_startObstruction()
+	{
+		const PLEX_DIMENS obstDimens = PLEX_convDimens(4, 4);
+
+		p_obstColIndex = (PROJ)_addCollisionBox(false, PLEX_WIDTHUNITMAX()/4.0 - obstDimens.w/2.0, PLEX_HEIGHTUNITMAX()/4.0 - obstDimens.h/2.0, obstDimens.w, obstDimens.h);
+
+		if(p_obstColIndex == -1)
+		{
+			PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_BADOPERATION, PLEX_ERROR_SEVERITY_MINOR, "Failed to create obstruction collision block");
+			return; // < redundant but put in case you put anything after this for any reason.
+		}
+	}
+
+Nearly identical except for the obstruction rather than the player. Which is in a different spot of the screen.
+
+----------------------------
+
+Step 50: Onto the drawing. In order to draw we have to get the rectangle from the indices of the collision blocks. If the two methods above work, we should already have them. Put this below the function 'static void p_startObstruction()'
+
+	static void p_drawPlayer()
+	{
+		const (PROJ)_COLLISIONBOX playerBox = (PROJ)_getCollisionBox(p_playerColIndex);
+
+		PLEX_fillRect(0, PLEX_UNIT(playerBox.area.origin.x), PLEX_UNIT(playerBox.area.origin.y), PLEX_UNIT(playerBox.area.dimens.w), PLEX_UNIT(playerBox.area.dimens.h), 255, 0, 0, 255, true);
+	}
+
+Pretty simple one here. It gets the collision rectangle of the player. Then it draws a red rectangle on the screen. Some new functions here:
+
+	A) PLEX_UNIT() if the first I'd like to focus on. PLEX_UNIT is where the scaling comes in. Plex Unit is adjusted by the screensize. On a screensize of 800x600 it will be 25. If you change the size of the screen it scales. A PLEX_UNIT is proportional no matter how large your screen is.
+
+	B) The second is the concept of the 'offset'. The last boolean passed to fill rect is 'true'. This draws in offset mode. Offset mode only considers a 4x3 ratio'd chunk of the screen in the middle. Anything outside of that borderspace. You can change that ratio to something different, but it's an advanced feature that can really mess everything up if not adjusted with care. I designed PLEX to allow resizing the window at any time. Features like this are designed to allow that process to go painlessly.
+
+	C) The '255, 0, 0, 255' indicates the color red. That's 'r, g, b, a' in truecolor (IE. every single pixel being 4 unsigned 8-bit integers fused into one 32-bit integer). So the reddist of red. If that's an eyesore just lower the first number.
+
+	D) The last thing is the '0' at the beginning of the fill rect. This is the drawlayer of the rectangle. The larger the number; the further back it is. This is a mechanism that allows you to control the order in which things draw, no matter what order you draw them in. You can pretty much put any number in there without expending RAM. It doesn't need to create a layer type internally; It just utilizes a sorting mechanism. I tend to create a list of 'drawlayer' macros referencing numbers in a header in my projects. This way I can control it centrally. You could also use consts as long as they're publicly accessible. The actual draw loop itself happens automatically during execution of 'PLEX_updatePlex'. This just sets up an instruction for it to happen during the draw loop later.
+
+Step 51: Again, a copy/paste function for the obstruction. This time it's blue (0, 0, 255, 255)
+
+	static void p_drawObstruction()
+	{
+		const (PROJ)_COLLISIONBOX obstBox = (PROJ)_getCollisionBox(p_obstColIndex);
+
+		PLEX_fillRect(0, PLEX_UNIT(obstBox.area.origin.x), PLEX_UNIT(obstBox.area.origin.y), PLEX_UNIT(obstBox.area.dimens.w), PLEX_UNIT(obstBox.area.dimens.h), 0, 0, 255, 255, true);
+	}
+
+----------------------------
+
+Now we move to the final section. Of course, you want to move your 'player' around, right? Well, it's easy. PLEX has all the input nice and simplified.
+
+Step 52: Create a new static function below 'p_drawObstruction':
+
+	static void p_movePlayer()
+	{
+		const double speed = 3;
+		const double velocity = PLEX_getGameSecondsPassed() * speed;
+
+		PLEX_POINT distance = PLEX_convPoint(0, 0);
+
+		if(PLEX_KEY_down('w')) distance.y -= velocity;
+		else if(PLEX_KEY_down('d')) distance.x += velocity;
+		else if(PLEX_KEY_down('s')) distance.y += velocity;
+		else if(PLEX_KEY_down('a')) distance.x -= velocity;
+
+		if(distance.x || distance.y) (PROJ)_addMove(p_playerColIndex, distance.x, distance.y);
+	}
+
+Most of this we've already covered but:
+
+	A) I'm using WASD controls here. I much prefer it to using arrows. 'PLEX_KEY_down' simply checks if a key is down. The input is read at every call of 'PLEX_updatePlex'. I use else statements to prevent the player from going in multiple directions. You can easily enable diagonal movement by changing it to:
+
+		if(PLEX_KEY_down('w')) distance.origin.y -= speed;
+		else if(PLEX_KEY_down('a')) distance.origin.x += speed;
+
+		if(PLEX_KEY_down('s')) distance.origin.y += speed;
+		else if(PLEX_KEY_down('d')) distance.origin.x -= speed;
+
+	B) The function 'PLEX_getGameSecondsPassed()' tosses a decimal value of how may seconds have passed since the last iteration of 'PLEX_updatePLEX'. It's an easy way to get a velocity system that scales to the second. This does not ignore pause, but there's an equivalent function in the 'utility/time' unit of PLEX for that.
+
+	C) The 'if(distance.origin.x || distance.origin.y)' is just a way to check if a move is needed. If both these values are '0' it means no moving is happening. Therefore no move request needs to be added to the stack.
+
+	D) the speed is hardset to 3. That's equivalent to PLEX_UNIT(3) per second. PLEX_UNIT takes in decimals so this can be smaller than 1. You can set this to whatever you want. The higher the number, the faster the movement.
+
+Step 53: You just have to put the moving into the check collision. Once you do that, you should be good. The function p_checkCollision that you copied before looked like this:
+
+	static void p_collisionTest()
+	{
+		if(!p_collisionInit)
+		{
+			p_startPlayer();
+			p_startObstruction();
+
+			p_collisionInit = true;
+		}
+
+		p_drawPlayer();
+		p_drawObstruction();
+	}
+
+
+You should modify to look like this:
+
+	static void p_collisionTest()
+	{
+		if(!p_collisionInit)
+		{
+			p_startPlayer();
+			p_startObstruction();
+
+			p_collisionInit = false;
+		}
+
+		p_movePlayer();
+
+		p_drawPlayer();
+		p_drawObstruction();
+	}
+
+NOTE: You can compile and test now. You should have a little red square that you can move with WASD and a big blue square you can't move through. If that's not the case, something went wrong.
+
+Step 54: Of course, we need the means to remove collision boxes. You can remove them from the stack using 'PLEX_removeExpandArray'. However, that displaces all boxes that come after the removed in 'p_cBoxes' stack. Since we use the placement as the index, that would change which box is being referred to by indices after the one removed.
+
+If you'd rather just remove them, then you can always identify collision boxes with a unique ID stored inside them. But that's not the way this example is coded. So, instead, that's why I included the 'activated' boolean in the struct. Above the comment that starts '// getters' put:
+
+	void (PROJ)_deactivateCollisionBox(const size_t index)
+	{
+		(PROJ)_COLLISIONBOX* box = NULL;
+
+		if(!p_running)
+		{
+			PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "While deactivating collision");
+			return;
+		}
+
+		if(index >= PLEX_expandArrayCount(p_cBoxes))
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_OVERLIMIT, PLEX_ERROR_SEVERITY_MINOR, "While deactivating collision", PLEX_ERRORMESS_GENERIC_INDEX);
+			return;
+		}
+
+		box = PLEX_getExpandArrayEntry(index, p_cBoxes);
+
+		if(box == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_FATAL, "While activating decollision", "Collision Box");
+			return;
+		}
+
+		box->activated = false;
+	}
+
+Step 55: Just above this function put the very similar function to activate collision boxes.
+
+	void (PROJ)_activateCollisionBox(const size_t index)
+	{
+		(PROJ)_COLLISIONBOX* box = NULL;
+
+		if(!p_running)
+		{
+			PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "While activating collision");
+			return;
+		}
+
+		if(index >= PLEX_expandArrayCount(p_cBoxes))
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_OVERLIMIT, PLEX_ERROR_SEVERITY_MINOR, "While activating collision", PLEX_ERRORMESS_GENERIC_INDEX);
+			return;
+		}
+
+		box = PLEX_getExpandArrayEntry(index, p_cBoxes);
+
+		if(box == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_FATAL, "While activating collision", "Collision Box");
+			return;
+		}
+
+		box->activated = true;
+	}
+
+Step 56: Since these are public functions, of course, we need to reference them in the header. Also above '// getters' in 'include/collision/collision.h' put:
+
+	extern void (PROJ)_activateCollisionBox(const size_t index);
+
+	extern void (PROJ)_deactivateCollisionBox(const size_t index);
+
+Step 57: Back in 'src/collision/collision.c' we'll check if a box at an index is activated. Since this is a getter function, we'll put it in the getter section. At the absolute bottom of the file:
+
+	bool (PROJ)_collisionBoxDeactivated(const size_t index)
+	{
+		(PROJ)_COLLISIONBOX* box = NULL;
+
+		if(!p_running)
+		{
+			PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "Check if collision is active.");
+			return false;
+		}
+
+		if(index >= PLEX_expandArrayCount(p_cBoxes))
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_OVERLIMIT, PLEX_ERROR_SEVERITY_MINOR, "Check if collision is active.", PLEX_ERRORMESS_GENERIC_INDEX);
+			return false;
+		}
+
+		box = PLEX_getExpandArrayEntry(index, p_cBoxes);
+
+		if(box == NULL)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACQUIRE, PLEX_ERROR_SEVERITY_FATAL, "Check if collision is active.", "Collision Box");
+			return false;
+		}
+
+		return !box->activated;
+	}
+
+Step 58: Another public function so we have to once again open 'include/collision/collision.h'. Below the line 'extern bool (PROJ)_isCollisionActive();' put:
+
+	extern bool (PROJ)_collisionBoxDeactivated(const size_t index);
+
+Step 59: We're going to now do a little demonstration. In 'src/collision/collision.c' scroll up to 'static void p_collisionTest()' modify the function to look like this:
+
+	static void p_collisionTest()
+	{
+		if(!p_collisionInit)
+		{
+			p_startPlayer();
+			p_startObstruction();
+
+			p_collisionInit = true;
+		}
+
+		if(!(PROJ)_collisionBoxDeactivated(p_playerColIndex))
+		{
+			p_movePlayer();
+			p_drawPlayer();
+		}
+
+		if(!(PROJ)_collisionBoxDeactivated(p_obstColIndex)) p_drawObstruction();
+	}
+
+Step 60: Next we'll be modifying the 'p_movePlayer()' function just above the function you just modified. Modify the movePlayer function to look like:
+
+	static void p_movePlayer()
+	{
+		const double speed = 3;
+		const double velocity = PLEX_getGameSecondsPassed() * speed;
+
+		PLEX_POINT distance = PLEX_convPoint(0, 0);
+
+		if(PLEX_KEY_down('w')) distance.y -= velocity;
+		else if(PLEX_KEY_down('d')) distance.x += velocity;
+		else if(PLEX_KEY_down('s')) distance.y += velocity;
+		else if(PLEX_KEY_down('a')) distance.x -= velocity;
+
+		if(PLEX_KEY_down('\n'))
+		{
+			if((PROJ)_collisionBoxDeactivated(p_obstColIndex)) (PROJ)_activateCollisionBox(p_obstColIndex);
+			else (PROJ)_deactivateCollisionBox(p_obstColIndex);
+		}
+
+		if(distance.x || distance.y) (PROJ)_addMove(p_playerColIndex, distance.x, distance.y);
+	}
+
+In PLEX, you can check if a user hits the enter/return key by passing the new line regex ('\n') into 'PLEX_KEY_down'. You can also use ' ' for space. Space only works if the pause is disabled using PLEX_disablePause (or by disabling pause in the config). Of course, to enable pause you need to use PLEX_enablePause.
+
+Step 61: The penultimate step! What if we want to just clear out the whole collision system and start again? That's easy, you've even used the function you need: 'PLEX_clearExpandArray'. So lets put a function to facilitate that for units outside this one. Just above the 'bool (PROJ)_collisionBoxDeactivated(const size_t index)' function put:
+
+	void (PROJ)_clearCollisionBoxes()
+	{
+		if(!p_running)
+		{
+			PLEX_error(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_ACTIONBEFORESTART, PLEX_ERROR_SEVERITY_MINOR, "While clear boxes");
+			return;
+		}
+
+		if(!p_active)
+		{
+			PLEX_error2(PLEX_ERROR_CATEGORY_INPROJECT, PLEX_ERROR_BADOPERATION, PLEX_ERROR_SEVERITY_MINOR, "While clear boxes", "Collision System is inactive");
+			return;
+		}
+
+		PLEX_clearExpandArray(p_cBoxes);
+	}
+
+Step 62: in 'include/collision/collision.h' above the function declaration 'bool (PROJ)_collisionBoxDeactivated(const size_t index)' put:
+
+	extern (PROJ)_COLLISIONBOX (PROJ)_getCollisionBox(const int64_t index);
+
+You're done! Hopefully everything went ok. What you should have is a 'WASD' controlled red square that crashes into a blue square. If you press the enter key it should toggle the blue square in/out of existence.
+
+NOTE: PLEX has some built-in polygonal collision math, but it's largely untested. It also sort-of only works with convex polygons that don't have absurd numbers of sides. Not fully implemented, but fun to play with if you know what you're doing. It's not terribly hard to plug in/out of this system. I won't provide a tutorial to do so, however. If you need one, you're probably not ready to experiment with that as of yet. It's referenced in 'src/utility/math.c' and 'include/utility/math.h' of PLEX.
+
+There will be more comprehensive documentation with the next release. Possibly more tutorials to do specific important things.
+
+Also this should be packaged with the source for 'MM_SideTales V.2'. You can check the source out for that to do various things.
+
+Another thing to note is that when you first run your PLEX based executable a 'config_en.pcfg' file is already generated. This is the config file for whatever executable it's in. It's got options to modify play. You even have advanced features like enabling the built-in memory profiler (Which is usually 'false' because it takes a lot of extra RAM, but it's extremely useful for debugging).
+
+Also, in PLEX you can maximize, minimize, and resize the screens of any programs any time you like. Everything scales!
+
+This should be enough to get started. Feel free to experiment. See you when I have documentation to make something more usable. Goodnight!

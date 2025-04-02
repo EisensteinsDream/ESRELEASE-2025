@@ -1,0 +1,101 @@
+#ifndef MMS_ERRORMESS_EN_H
+#define MMS_ERRORMESS_EN_H
+
+// MMS / MMS0 / MINIGAME 0
+
+#define MMS_ERRORMESS_ONCREATEPAMACTRESS "While creating the Pamaleana sprite theater actress."
+#define MMS_ERRORMESS_ONCREATELEVINEACTOR "While creating the Levine sprite theater actress."
+
+#define MMS_ERRORMESS_PAMACTORSPRITE "Pamaleana's sprite for sprite theater actress."
+#define MMS_ERRORMESS_LEVINEACTORSPRITE "Levine's sprite for sprite theater actor."
+
+#define MMS_ERRORMESS_PLEXFAIL "MMS Terminating because PLEX failed"
+#define MMS_ERRORMESS_MMCOMMFAIL "MMS Terminating because MM Common failed"
+
+#define MMS_ERRORMESS_STARTFAIL "MMS failed to start"
+
+// MMS1 / MINIGAME 1
+
+#define MMS1_ERRORMESS_ONCREATEOBSTRUCTION "While creating an obstruction for Dome City Panic."
+
+#define MMS1_ERRORMESS_OBSTRUCTIONSPRITE "Obstruction's sprite"
+
+// MMS2 / MINIGAME 2
+
+#define MMS2_ERRORMESS_ONSETCOVERGENERATOR "While setting the cover generator"
+#define MMS2_ERRORMESS_ONUSECOVERGENERATOR "While using the cover generator"
+#define MMS2_ERRORMESS_ONPLACECOVERGENERATOR "While placing cover information into the generator"
+#define MMS2_ERRORMESS_ONPULLENEMYGEN "While pulling from the enemy generator"
+#define MMS2_ERRORMESS_ONPLACEENEMYGEN "While placing enemy information into the generator"
+#define MMS2_ERRORMESS_ONCHECKENEMYGENERATOR "While checking the enemy generator"
+#define MMS2_ERRORMESS_ONLOADSNAPSHOT "While loading the save state"
+#define MMS2_ERRORMESS_ONDUMPSNAPSHOT "While saving the save state"
+#define MMS2_ERRORMESS_ONRUNGAME "Inside the minigame 2 main run loop"
+#define MMS2_ERRORMESS_ONSTARTGAME "While starting the minigame 2"
+#define MMS2_ERRORMESS_ONUPDATEGAME "While updating minigame 2"
+#define MMS2_ERRORMESS_ONENDGAME "While ending minigame 2"
+#define MMS2_ERRORMESS_ONDYING "While the player died"
+#define MMS2_ERRORMESS_ONGENBLANKROOMINFO "While generating a blank room's info"
+#define MMS2_ERRORMESS_ONGENROOMINFO "While generating room's info"
+#define MMS2_ERRORMESS_ONGENROOMPATH "While generating a room's path"
+#define MMS2_ERRORMESS_ONGENROOM "While generating a room"
+#define MMS2_ERRORMESS_ONGENROOMCONTENTS "While generating a room's contents"
+#define MMS2_ERRORMESS_ONGENROOMUPPATH "While generating a room's up path"
+#define MMS2_ERRORMESS_ONGENROOMRIGHTPATH "While generating a room's right path"
+#define MMS2_ERRORMESS_ONGENROOMDOWNPATH "While generating a room's down path"
+#define MMS2_ERRORMESS_ONGENROOMLEFTPATH "While generating a room's left path"
+#define MMS2_ERRORMESS_ONDESTROYROOMINFO "While destroying the room's info"
+#define MMS2_ERRORMESS_ONDESTROYROOMPATH "While destroying the room's path"
+#define MMS2_ERRORMESS_ONDESTROYROOM "While destroying the room"
+#define MMS2_ERRORMESS_ONDESTROYROOMPTR "While destroying the pointer to room"
+#define MMS2_ERRORMESS_ONMOVEROOM "While moving to a new room"
+#define MMS2_ERRORMESS_ONGETCURRENTROOMPATH "While getting the current room path"
+#define MMS2_ERRORMESS_ONPOINTCHECKPATH0 "While point checking for path 0"
+#define MMS2_ERRORMESS_ONPOINTCHECKPATH1 "While point checking for path 1"
+#define MMS2_ERRORMESS_ONPOINTCHECKPATH2 "While point checking for path 2"
+#define MMS2_ERRORMESS_ONPOINTCHECKPATH3 "While point checking for path 3"
+#define MMS2_ERRORMESS_ONPOINTCHECKPATH4 "While point checking for path 4"
+#define MMS2_ERRORMESS_ONMARKPATHFLAG "While marking path flag"
+#define MMS2_ERRORMESS_ONOPENINGPATH "While opening a path"
+#define MMS2_ERRORMESS_ONCHECKINGPATHCALM "While checking if a path is calm"
+#define MMS2_ERRORMESS_ONRETRIEVINGPATHFLOOR "While getting the floor of a path"
+#define MMS2_ERRORMESS_ONRETRIEVINGPATHSKY "While getting the sky of a path"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTROOMNAME "While getting a room's name"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTROOMCALMNESS "While getting a room's calmness"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTROOMFLOOR "While getting a room's floor"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTROOMSKY "While getting a room's sky"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTROOMFLAG "While getting a current room's flag"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTROOMMAYORMESSAGE "While getting a current room's mayor's message"
+#define MMS2_ERRORMESS_ONRETRIEVINGCURRENTENEMYGENERATOR "While getting a current room's enemy generator"
+#define MMS2_ERRORMESS_ONSTARTINGGAMEOVERSNAPSHOT "While starting the gameover/snapshot system"
+#define MMS2_ERRORMESS_ONCREATENPC "While creating an NPC"
+#define MMS2_ERRORMESS_ONCLEARNPC "While clearing an NPC"
+#define MMS2_ERRORMESS_ONUPDATESELECTGUN "While updating a gun selection"
+#define MMS2_ERRORMESS_ONRETURNSLOTINDEX "While returning the index at a gun in slot"
+#define MMS2_ERRORMESS_ONCOPYROOMNPCS "While copying a room's NPCs"
+#define MMS2_ERRORMESS_ONFINALBOSSDROPCOVER "After the final boss dropped a cover package"
+#define MMS2_ERRORMESS_ONFINALBOSSDROPENEMY "After the final boss dropped an enemy package"
+
+#define MMS2_ERRORMESS_ROOM "The Room the player is occupying"
+#define MMS2_ERRORMESS_ROOMINFO "The info of a room"
+#define MMS2_ERRORMESS_ROOMPATH "The path to a room"
+#define MMS2_ERRORMESS_CURRENTROOM "The current room"
+#define MMS2_ERRORMESS_CURRENTROOMPATH "The current room's path"
+#define MMS2_ERRORMESS_COVERCOUNT "Cover count"
+#define MMS2_ERRORMESS_ENEMYCOUNT "Enemy count"
+#define MMS2_ERRORMESS_ENEMYGENERATOR "Enemy generator"
+#define MMS2_ERRORMESS_SNAPSHOTFILE "Snapshot file ('mg2town' in the main folder)"
+#define MMS2_ERRORMESS_NPC "The NPC itself"
+#define MMS2_ERRORMESS_NPCTEX "The NPC's texture"
+#define MMS2_ERRORMESS_SELECTGUNCOUNT "Count of guns that are selectable"
+#define MMS2_ERRORMESS_SELECTGUNINDEX "The slot index of a gun"
+#define MMS2_ERRORMESS_NPCCOPYTO "The NPC copied to"
+#define MMS2_ERRORMESS_NPCCOPYFROM "The NPC copied from"
+#define MMS2_ERRORMESS_GENCOVER "The generated cover"
+#define MMS2_ERRORMESS_GENENEMY "The generated enemy"
+
+#define MMS2_ERRORMESS_OP_POINTCHECKTOWN "Failed to generate the current room based off of town points"
+#define MMS2_ERRORMESS_OP_SETGAME "Operation to set the game"
+#define MMS2_ERRORMESS_OP_LOADSNAPSHOT "Operation to load snapshot"
+
+#endif

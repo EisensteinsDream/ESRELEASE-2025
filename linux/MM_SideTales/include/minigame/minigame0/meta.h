@@ -1,0 +1,67 @@
+#ifndef MMS_MINIGAME0_META_H
+#define MMS_MINIGAME0_META_H
+
+#include "plex.h"
+
+#include "mmcommon.h"
+
+#include "chapters/unlock.h"
+
+#include "meta/mms_filepaths.h"
+
+// DIRECTIONS
+
+#define MMS0_DIRECTION_UP 0
+#define MMS0_DIRECTION_RIGHT 1
+#define MMS0_DIRECTION_DOWN 2
+#define MMS0_DIRECTION_LEFT 3
+#define MMS0_DIRECTION_NONE 4
+
+// PUSH TIME (microseconds)
+
+#define MMS0_PUSHTIME 300
+
+// DRAW LAYERS
+
+#define MMS0_DRAWLAYER_FLOORBACK 10001
+#define MMS0_DRAWLAYER_FLOORFRONT 10000
+
+// TABLE
+
+#define MMS0_TABLE_MAX 4
+
+// ENEMY
+
+#define MMS0_ENEMY_MAX 10
+
+#define MMS0_ENEMY_STOPGEN 20
+
+#define MMS0_ENEMY_HEIGHT 1.5
+#define MMS0_ENEMY_WIDTH 3
+
+#define MMS0_ENEMY_SPOTCOUNT 3
+
+#define MMS0_ENEMY_SPOT_Y PLEX_HEIGHTUNITMAX() - 3.25
+
+#define MMS0_ENEMY_SPOT1_X 3.25
+#define MMS0_ENEMY_SPOT2_X PLEX_WIDTHUNITMAX()/2
+#define MMS0_ENEMY_SPOT3_X PLEX_WIDTHUNITMAX() - 3.25
+
+#define MMSO_ENEMY_MINWALKSPEED 0.002
+#define MMSO_ENEMY_MAXWALKSPEED 0.01
+
+#define MMSO_ENEMY_PUSHSPEED 0.12
+
+#define MMS0_ENEMY_DRINKDIST 0.1
+#define MMS0_ENEMY_ENEMYDRINKLINE prizeRect.origin.y + (prizeRect.dimens.h * 2)
+
+// MOMENTUM NUMBERS (Per second unit movement)
+
+#define MMS0_MOMENTUM_PLAYER 0.008
+#define MMS0_MOMENTUM_TABLE 0.00005
+
+// COFFEE DRINKING SPEED
+
+#define MMS0_COFFEEDRINKSPEED 0.025
+
+#endif
